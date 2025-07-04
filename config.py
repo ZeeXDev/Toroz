@@ -32,7 +32,7 @@ PORT = os.environ.get("PORT", "8001")
 DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://Toonpro12:animebash@cluster0.e6hpn8l.mongodb.net/?retryWrites=true&w=majority")
 DB_NAME = os.environ.get("DATABASE_NAME", "Cluooo")
 #--------------------------------------------
-FSUB_LINK_EXPIRY = int(os.getenv("FSUB_LINK_EXPIRY", "30"))  # 0 means no expiry
+FSUB_LINK_EXPIRY = int(os.getenv("FSUB_LINK_EXPIRY", "60"))  # 0 means no expiry
 BAN_SUPPORT = os.environ.get("BAN_SUPPORT", "https://t.me/BotZflixSupport")
 TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "200"))
 #--------------------------------------------
@@ -41,12 +41,12 @@ FORCE_PIC = os.environ.get("FORCE_PIC", "https://iili.io/FakDfLu.md.jpg")
 #--------------------------------------------
 
 #--------------------------------------------
-HELP_TXT = "<b><blockquote>Ceci est un bot de lien de fichier pour @Nova_Flix\n\n❏ Commandes du bot\n├/start : Démarrer le bot\n├/about : Nos informations\n└/help : Aide relative au bot\n\nCliquez simplement sur le lien et démarrez le bot. Rejoignez les deux canaux et réessayez, c'est tout... !\n\nDéveloppé par <a href=https://t.me/cosmic_freak>Subaru</a></blockquote></b>"
-ABOUT_TXT = "<b><blockquote>◈ Créateur : <a href=https://t.me/cosmic_freak>Yato</a>\n◈ Fondateur de : <a href=https://t.me/otakuflix_network>Réseau OtakuFlix</a>\n◈ Chaîne d'anime : <a href=https://t.me/anime_cruise_netflix>Anime Cruise</a>\n◈ Chaîne de séries : <a href=https://t.me/webseries_flix>WebSeries Flix</a>\n◈ Manhwa adulte : <a href=https://t.me/pornhwa_flix>Pornhwas</a>\n◈ Développeur : <a href=https://t.me/cosmic_freak>Subaru</a></blockquote></b>"
+HELP_TXT = "<b><blockquote>Ceci est un bot de lien de fichier pour @Anime_Terr\n\n❏ Commandes du bot\n├/start : Démarrer le bot\n├/about : Nos informations\n└/help : Aide relative au bot\n\nCliquez simplement sur le lien et démarrez le bot. Rejoignez les deux canaux et réessayez, c'est tout... !\n\nDéveloppé par <a href=https://t.me/cosmic_freak>Subaru</a></blockquote></b>"
+ABOUT_TXT = "<b><blockquote>◈ Créateur : <a href=https://t.me/Kingcey>Kingcey</a>\n◈ Fondateur de : <a href=https://t.me/ZFlixTeam>ZFlix-Team</a>\n◈ Chaîne d'anime : <a href=https://t.me/Anime_Terr>Anime Terr</a>\n◈ Chaîne de séries : <a href=https://t.me/AntiFlix_A> AntiFlix</a>\n◈ Vos Bots : <a href=https://t.me/BotZFlix>BotZFlix</a>\n◈ Développeur : <a href=https://t.me/Kingcey>Kingcey</a></blockquote></b>"
 #--------------------------------------------
 #--------------------------------------------
-START_MSG = os.environ.get("START_MESSAGE", "<b>Bonjour {first}\n\n<blockquote>Je suis un bot de stockage de fichiers, je peux stocker des fichiers privés dans un canal spécifié et d'autres utilisateurs peuvent y accéder via un lien spécial.</blockquote></b>")
-FORCE_MSG = os.environ.get("FORCE_SUB_MESSAGE", "Bonjour {first}\n\n<b>Rejoignez nos canaux puis cliquez sur le bouton Recharger pour obtenir le fichier demandé.</b>")
+START_MSG = os.environ.get("START_MESSAGE", "<b>Bonjour {first}\n\n<blockquote>I'm Sukuna, je suis là pour vous aider à récupérer vos fichiers via un lien spécial.</blockquote></b>")
+FORCE_MSG = os.environ.get("FORCE_SUB_MESSAGE", "Salut {first}\n\n<b>Rejoignez nos canaux puis cliquez sur le bouton Recharger pour obtenir le fichier demandé.</b>")
 
 CMD_TXT = """<blockquote><b>» Commandes administrateur :</b></blockquote>
 
