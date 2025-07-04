@@ -66,7 +66,7 @@ CMD_TXT = """<blockquote><b>» Commandes administrateur :</b></blockquote>
 <b>›› /admins :</b> Obtenir la liste des administrateurs
 """
 #--------------------------------------------
-CUSTOM_CAPTION = os.environ.get("CUSTOM_CAPTION", "<b>{previous_caption}\n• Par @Anime_Terr</b>") #Définissez votre légende personnalisée ici, mettez None pour désactiver
+CUSTOM_CAPTION = os.environ.get("CUSTOM_CAPTION", "<b>• Par @Anime_Terr</b>") #Définissez votre légende personnalisée ici, mettez None pour désactiver
 PROTECT_CONTENT = True if os.environ.get('PROTECT_CONTENT', "False") == "True" else False #Mettez True si vous voulez empêcher le transfert de fichiers depuis le bot
 #--------------------------------------------
 #Mettez True si vous voulez désactiver le bouton de partage des posts du canal
