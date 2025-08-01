@@ -73,7 +73,7 @@ CUSTOM_CAPTION = os.environ.get("CUSTOM_CAPTION", "<b><blockquote>• @ZeeXDev</
 PROTECT_CONTENT = True if os.environ.get('PROTECT_CONTENT', "False") == "True" else False #Mettez True si vous voulez empêcher le transfert de fichiers depuis le bot
 #--------------------------------------------
 #Mettez True si vous voulez désactiver le bouton de partage des posts du canal
-DISABLE_CHANNEL_BUTTON = os.environ.get("DISABLE_CHANNEL_BUTTON", None) == 'True'
+DISABLE_CHANNEL_BUTTON = os.environ.get("DISABLE_CHANNEL_BUTTON", "True") == 'True'
 #--------------------------------------------
 BOT_STATS_TEXT = "<b>TEMPS DE FONCTIONNEMENT DU BOT</b>\n{uptime}"
 USER_REPLY_TEXT = "Bakka ! Tu n'es pas mon senpai !!"
