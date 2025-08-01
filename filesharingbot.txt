@@ -1,0 +1,9 @@
+[01-Aug-25 00:32:20 - INFO] - bot - Bot Running..!
+
+Created by 
+https://t.me/BotZFlixSupport
+[01-Aug-25 00:32:20 - INFO] - bot - BOT DEPLOYED BY @BotZFlix
+[01-Aug-25 00:32:20 - INFO] - bot - Bot Running..! Made by @ZeeXDev
+[01-Aug-25 00:32:22 - INFO] - bot - Bot is now running. Thanks to @Kingcey
+[01-Aug-25 00:34:12 - INFO] - bot - Shutting down...
+[01-Aug-25 00:34:12 - INFO] - bot - Bot stopped.

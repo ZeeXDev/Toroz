@@ -1,6 +1,3 @@
-#(©)CodeFlix_Bots
-#rohit_1888 on Tg #Dont remove this line
-
 import base64
 import re
 import asyncio
@@ -14,7 +11,6 @@ from database.database import *
 
 
 
-#used for cheking if a user is admin ~Owner also treated as admin level
 async def check_admin(filter, client, update):
     try:
         user_id = update.from_user.id       
@@ -163,5 +159,3 @@ def get_exp_time(seconds):
 
 subscribed = filters.create(is_subscribed)
 admin = filters.create(check_admin)
-
-#rohit_1888 on Tg :

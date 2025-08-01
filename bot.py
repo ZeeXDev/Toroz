@@ -42,7 +42,7 @@ class Bot(Client):
         except Exception as e:
             self.LOGGER(__name__).warning(e)
             self.LOGGER(__name__).warning(f"Make Sure bot is Admin in DB Channel, and Double check the CHANNEL_ID Value, Current Value {CHANNEL_ID}")
-            self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/BotZFlixSupport for support")
+            self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/BTZF_CHAT for support")
             sys.exit()
 
         self.set_parse_mode(ParseMode.HTML)
@@ -51,7 +51,7 @@ class Bot(Client):
 
         self.set_parse_mode(ParseMode.HTML)
         self.username = usr_bot_me.username
-        self.LOGGER(__name__).info(f"Bot Running..! Made by @BotZFlix")   
+        self.LOGGER(__name__).info(f"Bot Running..! Made by @ZeeXDev")   
 
         # Start Web Server
         app = web.AppRunner(await web_server())
@@ -59,7 +59,7 @@ class Bot(Client):
         await web.TCPSite(app, "0.0.0.0", PORT).start()
 
 
-        try: await self.send_message(OWNER_ID, text = f"<b><blockquote> Bᴏᴛ Redémarré Par @BotZFlix</blockquote></b>")
+        try: await self.send_message(OWNER_ID, text = f"<b><blockquote> Bᴏᴛ Rᴇᴅéᴍᴀʀʀᴇʀ 🥰😘</blockquote></b>")
         except: pass
 
     async def stop(self, *args):

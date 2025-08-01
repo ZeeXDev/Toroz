@@ -1,22 +1,10 @@
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-
 import asyncio
 import os
 import random
 import sys
 import time
 from datetime import datetime, timedelta
-from pyrogram import Client, filters, __version__
+from pyrogram import Client, filters
 from pyrogram.enums import ParseMode, ChatAction
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, ChatInviteLink, ChatPrivileges
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
@@ -28,257 +16,254 @@ from database.database import *
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 
+async def determine_media_type(msg):
+    """Détermine le type de média et retourne l'action appropriée"""
+    if msg.video:
+        return ChatAction.UPLOAD_VIDEO
+    elif msg.document:
+        return ChatAction.UPLOAD_DOCUMENT
+    elif msg.photo:
+        return ChatAction.UPLOAD_PHOTO
+    elif msg.audio:
+        return ChatAction.UPLOAD_AUDIO
+    else:
+        return ChatAction.TYPING
+
+async def send_with_progress(client, message, msg):
+    """Envoie le média avec la bonne action et gestion des erreurs"""
+    try:
+        # Détermine l'action appropriée
+        action = await determine_media_type(msg)
+        await client.send_chat_action(message.chat.id, action)
+        
+        # Prépare la légende
+        original_caption = msg.caption.html if msg.caption else ""
+        caption = f"{original_caption}\n\n{CUSTOM_CAPTION}" if CUSTOM_CAPTION else original_caption
+        
+        # Envoie le média
+        sent_msg = await msg.copy(
+            chat_id=message.from_user.id,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            reply_markup=msg.reply_markup if not DISABLE_CHANNEL_BUTTON else None,
+            protect_content=PROTECT_CONTENT
+        )
+        await asyncio.sleep(0.9)
+        return sent_msg
+    except FloodWait as e:
+        await asyncio.sleep(e.x)
+        return await send_with_progress(client, message, msg)
+    except Exception as e:
+        print(f"Erreur lors de l'envoi: {e}")
+        return None
+
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
     user_id = message.from_user.id
 
-    # Check if user is banned
-    banned_users = await db.get_ban_users()
-    if user_id in banned_users:
-        return await message.reply_text(
-            "<b>⛔️ Tu as été banni fu bot.</b>\n\n"
-            "<i>Contacte le support si tu pense que c'est une erreur.</i>",
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Contact Support", url=BAN_SUPPORT)]]
-            )
-        )
-    # ✅ Check Force Subscription
-    if not await is_subscribed(client, user_id):
-        #await temp.delete()
-        return await not_joined(client, message)
+    banned_users = await db.get_ban_users()  
+    if user_id in banned_users:  
+        return await message.reply_text(  
+            "<b>⛔️ Tu as été banni du bot.</b>\n\n"  
+            "<i>Contacte le support si tu penses que c'est une erreur.</i>",  
+            reply_markup=InlineKeyboardMarkup(  
+                [[InlineKeyboardButton("Contact Support", url=BAN_SUPPORT)]]  
+            )  
+        )  
+    
+    if not await is_subscribed(client, user_id):  
+        return await not_joined(client, message)  
 
-    # File auto-delete time in seconds (Set your desired time in seconds here)
-    FILE_AUTO_DELETE = await db.get_del_timer()  # Example: 3600 seconds (1 hour)
+    FILE_AUTO_DELETE = await db.get_del_timer()  
 
-    # Add user if not already present
-    if not await db.present_user(user_id):
-        try:
-            await db.add_user(user_id)
-        except:
-            pass
+    if not await db.present_user(user_id):  
+        try:  
+            await db.add_user(user_id)  
+        except:  
+            pass  
 
-    # Handle normal message flow
-    text = message.text
-    if len(text) > 7:
-        try:
-            base64_string = text.split(" ", 1)[1]
-        except IndexError:
-            return
+    text = message.text  
+    if len(text) > 7:  
+        try:  
+            base64_string = text.split(" ", 1)[1]  
+        except IndexError:  
+            return  
 
-        string = await decode(base64_string)
-        argument = string.split("-")
+        string = await decode(base64_string)  
+        argument = string.split("-")  
 
-        ids = []
-        if len(argument) == 3:
-            try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
-                ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
-            except Exception as e:
-                print(f"Error decoding IDs: {e}")
-                return
+        ids = []  
+        if len(argument) == 3:  
+            try:  
+                start = int(int(argument[1]) / abs(client.db_channel.id))  
+                end = int(int(argument[2]) / abs(client.db_channel.id))  
+                ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))  
+            except Exception as e:  
+                print(f"Error decoding IDs: {e}")  
+                return  
 
-        elif len(argument) == 2:
-            try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-            except Exception as e:
-                print(f"Error decoding ID: {e}")
-                return
+        elif len(argument) == 2:  
+            try:  
+                ids = [int(int(argument[1]) / abs(client.db_channel.id))]  
+            except Exception as e:  
+                print(f"Error decoding ID: {e}")  
+                return  
 
-        temp_msg = await message.reply("<b>Veuillez Patienter!!!!!...</b>")
-        try:
-            messages = await get_messages(client, ids)
-        except Exception as e:
-            await message.reply_text("Something went wrong!")
-            print(f"Error getting messages: {e}")
-            return
-        finally:
-            await temp_msg.delete()
- 
-        codeflix_msgs = []
+        temp_msg = await message.reply("<b>⏳ Préparation des médias...</b>")  
+        try:  
+            messages = await get_messages(client, ids)  
+        except Exception as e:  
+            await message.reply_text("❌ Erreur lors de la récupération des médias")  
+            print(f"Error getting messages: {e}")  
+            return  
+        finally:  
+            await temp_msg.delete()  
 
-        for msg in messages:
-            original_caption = msg.caption.html if msg.caption else ""
-            caption = f"{original_caption}\n\n{CUSTOM_CAPTION}" if CUSTOM_CAPTION else original_caption
-            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+        sent_messages = []  
 
-            try:
-                snt_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=reply_markup,
-                    protect_content=PROTECT_CONTENT
-                )
-                await asyncio.sleep(0.5)
-                codeflix_msgs.append(snt_msg)
-            except FloodWait as e:
-                await asyncio.sleep(e.x)
-                copied_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    parse_mode=ParseMode.HTML,
-                    reply_markup=reply_markup,
-                    protect_content=PROTECT_CONTENT
-                )
-                codeflix_msgs.append(copied_msg)
-            except:
-                pass
+        for msg in messages:  
+            sent_msg = await send_with_progress(client, message, msg)  
+            if sent_msg:  
+                sent_messages.append(sent_msg)  
 
-        if FILE_AUTO_DELETE > 0:
-            notification_msg = await message.reply(
-                f"<b>Ce fichier sera supprimée dans{get_exp_time(FILE_AUTO_DELETE)}. Veuillez la sauvegarder dans vos messages pour ne pas la perdre.</b>"
-            )
+        if FILE_AUTO_DELETE > 0 and sent_messages:  
+            notification_msg = await message.reply(  
+                f"<b>❗️ IMPORTANT ❗️\n\n⚠️ Ce(s) fichier(s) sera(ont) supprimé(s) dans {get_exp_time(FILE_AUTO_DELETE)} (pour cause de droits d'auteurs)\n\n📌 Veuillez la(es) transférez pour ne pas la(es) perdre(s)..</b>"  
+            )  
 
-            await asyncio.sleep(FILE_AUTO_DELETE)
+            await asyncio.sleep(FILE_AUTO_DELETE)  
 
-            for snt_msg in codeflix_msgs:    
-                if snt_msg:
-                    try:    
-                        await snt_msg.delete()  
-                    except Exception as e:
-                        print(f"Error deleting message {snt_msg.id}: {e}")
+            for snt_msg in sent_messages:      
+                try:      
+                    await snt_msg.delete()    
+                except Exception as e:  
+                    print(f"Error deleting message {snt_msg.id}: {e}")  
 
-            try:
-                reload_url = (
-                    f"https://t.me/{client.username}?start={message.command[1]}"
-                    if message.command and len(message.command) > 1
-                    else None
-                )
-                keyboard = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("Récupérer à nouveau le fichier!", url=reload_url)]]
-                ) if reload_url else None
+            try:  
+                reload_url = (  
+                    f"https://t.me/{client.username}?start={message.command[1]}"  
+                    if message.command and len(message.command) > 1  
+                    else None  
+                )  
+                keyboard = InlineKeyboardMarkup(  
+                    [[InlineKeyboardButton("🔄 Récupérer à nouveau", url=reload_url)]]  
+                ) if reload_url else None  
 
-                await notification_msg.edit(
-                    "<b>Le Fichier ou Vidéo a été supprimé !!\n\nClique sur le bouton pour récupérer à nouveau le fichier👇👇</b>",
-                    reply_markup=keyboard
-                )
-            except Exception as e:
-                print(f"Error updating notification with 'Get File Again' button: {e}")
-    else:
-        reply_markup = InlineKeyboardMarkup(
-            [
-                    [InlineKeyboardButton("• Autre Canal •", url="https://t.me/ZFlixTeam")],
+                await notification_msg.edit(  
+                    "<b>🗑️ Le(s) média(s) a/ont été supprimé(s) !</b>\n\n"  
+                    "<i>Cliquez ci-dessous pour les récupérer à nouveau</i>",  
+                    reply_markup=keyboard  
+                )  
+            except Exception as e:  
+                print(f"Error updating notification: {e}")  
+    else:  
+        reply_markup = InlineKeyboardMarkup(  
+            [  
+                [InlineKeyboardButton("📢 Chaîne Officielle", url="https://t.me/ZeeXDev")],  
+                [  
+                    InlineKeyboardButton("ℹ️ À Propos", callback_data="about"),  
+                    InlineKeyboardButton("❓ Aide", callback_data="help")  
+                ]  
+            ]  
+        )  
+        await message.reply_photo(  
+            photo=START_PIC,  
+            caption=START_MSG.format(  
+                first=message.from_user.first_name,  
+                last=message.from_user.last_name,  
+                username=None if not message.from_user.username else '@' + message.from_user.username,  
+                mention=message.from_user.mention,  
+                id=message.from_user.id  
+            ),  
+            reply_markup=reply_markup,  
+            message_effect_id=5104841245755180586  
+        )  
 
-    [
-                    InlineKeyboardButton("• À Propos", callback_data = "about"),
-                    InlineKeyboardButton('Aide •', callback_data = "help")
-
-    ]
-            ]
-        )
-        await message.reply_photo(
-            photo=START_PIC,
-            caption=START_MSG.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name,
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                mention=message.from_user.mention,
-                id=message.from_user.id
-            ),
-            reply_markup=reply_markup,
-            message_effect_id=5104841245755180586)  # 🔥
-        
-        return
-
-
-
-#=====================================================================================##
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-
-
-
-# Create a global dictionary to store chat data
 chat_data_cache = {}
 
 async def not_joined(client: Client, message: Message):
-    temp = await message.reply("<b><i>Attendez Quelques Secondes.</i></b>")
+    temp = await message.reply("<b><i>Vérification en cours...</i></b>")
 
-    user_id = message.from_user.id
-    buttons = []
-    count = 0
+    user_id = message.from_user.id  
+    buttons = []  
+    count = 0  
 
-    try:
-        all_channels = await db.show_channels()  # Should return list of (chat_id, mode) tuples
-        for total, chat_id in enumerate(all_channels, start=1):
-            mode = await db.get_channel_mode(chat_id)  # fetch mode 
+    try:  
+        all_channels = await db.show_channels()  
+        for total, chat_id in enumerate(all_channels, start=1):  
+            mode = await db.get_channel_mode(chat_id)  
 
-            await message.reply_chat_action(ChatAction.TYPING)
+            await message.reply_chat_action(ChatAction.TYPING)  
 
-            if not await is_sub(client, user_id, chat_id):
-                try:
-                    # Cache chat info
-                    if chat_id in chat_data_cache:
-                        data = chat_data_cache[chat_id]
-                    else:
-                        data = await client.get_chat(chat_id)
-                        chat_data_cache[chat_id] = data
+            if not await is_sub(client, user_id, chat_id):  
+                try:  
+                    if chat_id in chat_data_cache:  
+                        data = chat_data_cache[chat_id]  
+                    else:  
+                        data = await client.get_chat(chat_id)  
+                        chat_data_cache[chat_id] = data  
 
-                    name = data.title
+                    name = data.title  
 
-                    # Generate proper invite link based on the mode
-                    if mode == "on" and not data.username:
-                        invite = await client.create_chat_invite_link(
-                            chat_id=chat_id,
-                            creates_join_request=True,
-                            expire_date=datetime.utcnow() + timedelta(seconds=FSUB_LINK_EXPIRY) if FSUB_LINK_EXPIRY else None
-                            )
-                        link = invite.invite_link
+                    if mode == "on" and not data.username:  
+                        invite = await client.create_chat_invite_link(  
+                            chat_id=chat_id,  
+                            creates_join_request=True,  
+                            expire_date=datetime.utcnow() + timedelta(seconds=FSUB_LINK_EXPIRY) if FSUB_LINK_EXPIRY else None  
+                        )  
+                        link = invite.invite_link  
+                    else:  
+                        if data.username:  
+                            link = f"https://t.me/{data.username}"  
+                        else:  
+                            invite = await client.create_chat_invite_link(  
+                                chat_id=chat_id,  
+                                expire_date=datetime.utcnow() + timedelta(seconds=FSUB_LINK_EXPIRY) if FSUB_LINK_EXPIRY else None)  
+                            link = invite.invite_link  
 
-                    else:
-                        if data.username:
-                            link = f"https://t.me/{data.username}"
-                        else:
-                            invite = await client.create_chat_invite_link(
-                                chat_id=chat_id,
-                                expire_date=datetime.utcnow() + timedelta(seconds=FSUB_LINK_EXPIRY) if FSUB_LINK_EXPIRY else None)
-                            link = invite.invite_link
+                    buttons.append([InlineKeyboardButton(text=name, url=link)])  
+                    count += 1  
+                    await temp.edit(f"<b>🔍 Vérification {count}/{len(all_channels)}...</b>")  
 
-                    buttons.append([InlineKeyboardButton(text=name, url=link)])
-                    count += 1
-                    await temp.edit(f"<b>{'! ' * count}</b>")
+                except Exception as e:  
+                    print(f"Error with chat {chat_id}: {e}")  
+                    return await temp.edit(  
+                        f"<b><i>❌ Erreur technique</i></b>\n"  
+                        f"<i>Contactez @ZeeXDevBot</i>\n\n"  
+                        f"<code>Raison: {e}</code>"  
+                    )  
 
-                except Exception as e:
-                    print(f"Error with chat {chat_id}: {e}")
-                    return await temp.edit(
-                        f"<b><i>! Erreur. Contact le développeur @Kingcey</i></b>\n"
-                        f"<blockquote expandable><b>Raison:</b> {e}</blockquote>"
-                    )
+        try:  
+            buttons.append([  
+                InlineKeyboardButton(  
+                    text='🔄 Vérifier à nouveau',  
+                    url=f"https://t.me/{client.username}?start={message.command[1]}"  
+                )  
+            ])  
+        except IndexError:  
+            pass  
 
-        # Retry Button
-        try:
-            buttons.append([
-                InlineKeyboardButton(
-                    text='♻️ Essaie Encore',
-                    url=f"https://t.me/{client.username}?start={message.command[1]}"
-                )
-            ])
-        except IndexError:
-            pass
+        await message.reply_photo(  
+            photo=FORCE_PIC,  
+            caption=FORCE_MSG.format(  
+                first=message.from_user.first_name,  
+                last=message.from_user.last_name,  
+                username=None if not message.from_user.username else '@' + message.from_user.username,  
+                mention=message.from_user.mention,  
+                id=message.from_user.id  
+            ),  
+            reply_markup=InlineKeyboardMarkup(buttons),  
+        )  
 
-        await message.reply_photo(
-            photo=FORCE_PIC,
-            caption=FORCE_MSG.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name,
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                mention=message.from_user.mention,
-                id=message.from_user.id
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons),
+    except Exception as e:  
+        print(f"Final Error: {e}")  
+        await temp.edit(  
+            f"<b><i>❌ Erreur critique</i></b>\n"  
+            f"<i>Contactez @ZeeXDevBot</i>\n\n"  
+            f"<code>Détails: {e}</code>"  
         )
 
-    except Exception as e:
-        print(f"Final Error: {e}")
-        await temp.edit(
-            f"<b><i>! Une erreur est survenue. Veuillez contacter le développeur : @Kingcey</i></b>\n"
-            f"<blockquote expandable><b>Raison:</b> {e}</blockquote>"
-        )
-
-#=====================================================================================##
-
-@Bot.on_message(filters.command('kingcey') & filters.private & admin)
-async def bcmd(bot: Bot, message: Message):        
-    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• Fermer •", callback_data = "close")]])
-    await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
+@Bot.on_message(filters.command('commands') & filters.private & admin)
+async def bcmd(bot: Bot, message: Message):
+    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("❌ Fermer", callback_data="close")]])
+    await message.reply(text=CMD_TXT, reply_markup=reply_markup, quote=True)
